@@ -1,65 +1,254 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import UploadZone from '@/app/components/UploadZone';
+import DateRangePicker from '@/app/components/DateRangePicker';
+import ActionButtons from '@/app/components/ActionButtons';
+import DataTable from '@/app/components/DataTable';
+import LoginModal from '@/app/components/LoginModal';
+import MonthCalendar from '@/app/components/MonthCalendar';
 
 export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [showLogin, setShowLogin] = useState(false);
+    const [loginError, setLoginError] = useState('');
+    const [exporting, setExporting] = useState(false);
+
+    const [reportDate, setReportDate] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [rows, setRows] = useState([]);
+    const [headers, setHeaders] = useState([]);
+    const [dateCol, setDateCol] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [message, setMessage] = useState(null);
+
+    // ── Check login status on mount ──────────────────────────────
+    useEffect(() => {
+        fetch('/api/auth')
+            .then(res => res.json())
+            .then(data => {
+                if (data.loggedIn) setIsLoggedIn(true);
+            })
+            .catch(() => setIsLoggedIn(false));
+    }, []);
+
+    const handleDateSelect = (dateStr) => {
+    setStartDate(dateStr);
+    setEndDate(dateStr);
+    // fetchData will be triggered by useEffect
+};
+
+    // ── Login handler ────────────────────────────────────────────
+    const handleLogin = async (username, password) => {
+        try {
+            const res = await fetch('/api/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Invalid credentials');
+            setIsLoggedIn(true);
+            setShowLogin(false);
+            setLoginError('');
+        } catch (err) {
+            setLoginError(err.message);
+        }
+    };
+
+    const handleLogout = async () => {
+        await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'logout' }),
+        });
+        setIsLoggedIn(false);
+        setReportDate('');
+        setMessage(null);
+    };
+
+    // ── Fetch data ──────────────────────────────────────────────
+    const fetchData = useCallback(async () => {
+        setMessage(null);
+        if (!startDate || !endDate) {
+            setRows([]);
+            setHeaders([]);
+            setDateCol(null);
+            return;
+        }
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/data?start=${startDate}&end=${endDate}`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to fetch');
+            setRows(data.rows);
+            if (data.rows.length) {
+                const h = Object.keys(data.rows[0].data);
+                setHeaders(h);
+                setDateCol(h.find(col => /date/i.test(col)) || null);
+            } else {
+                setHeaders([]);
+                setDateCol(null);
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: err.message });
+        } finally {
+            setLoading(false);
+        }
+    }, [startDate, endDate]); // ✅ dependencies only what's used inside
+
+    // ── Auto‑fetch when date range changes ──────────────────────
+    useEffect(() => {
+        fetchData();
+    }, [startDate, endDate]); // ✅ no `fetchData` in deps to avoid size change
+
+    // ── Upload ──────────────────────────────────────────────────
+    const handleUpload = async (file) => {
+        if (!reportDate) {
+            setMessage({ type: 'error', text: 'Please select a report date before uploading.' });
+            return;
+        }
+        setUploading(true);
+        setMessage(null);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('reportDate', reportDate);
+        try {
+            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Upload failed');
+            setMessage({ type: 'success', text: data.message });
+            setStartDate(reportDate);
+            setEndDate(reportDate);
+            setReportDate('');
+        } catch (err) {
+            setMessage({ type: 'error', text: err.message });
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    // ── Export ──────────────────────────────────────────────────
+    const handleExport = async (format) => {
+        if (!startDate || !endDate) {
+            setMessage({ type: 'error', text: 'Select date range first.' });
+            return;
+        }
+        setExporting(true);
+        try {
+            const res = await fetch(`/api/export/${format}?start=${startDate}&end=${endDate}`);
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || 'Export failed');
+            }
+            const blob = await res.blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Report_${startDate}_to_${endDate}.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            setMessage({ type: 'success', text: `Exported as ${format.toUpperCase()}` });
+        } catch (err) {
+            setMessage({ type: 'error', text: err.message });
+        }
+        finally {
+        setExporting(false);
+    }
+    };
+
+    // ── Delete ──────────────────────────────────────────────────
+    const handleDelete = async () => {
+        if (!startDate || !endDate) {
+            setMessage({ type: 'error', text: 'Select date range first.' });
+            return;
+        }
+        if (!confirm(`Delete all data from ${startDate} to ${endDate}?`)) return;
+        try {
+            const res = await fetch(`/api/data?start=${startDate}&end=${endDate}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Delete failed');
+            setMessage({ type: 'success', text: data.message });
+            setRows([]);
+            setHeaders([]);
+            setDateCol(null);
+        } catch (err) {
+            setMessage({ type: 'error', text: err.message });
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50 p-4 md:p-8 font-sans antialiased">
+            <div className="max-w-7xl mx-auto">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-light text-gray-800 tracking-tight">
+                        📊 Daily Report Manager
+                    </h1>
+                    {isLoggedIn ? (
+                        <button
+                            onClick={handleLogout}
+                            className="text-sm text-gray-500 hover:text-red-600 border border-gray-200 px-4 py-1.5 rounded-lg hover:border-red-300 transition-colors"
+                        >
+                            Logout
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => setShowLogin(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                        >
+                            Login
+                        </button>
+                    )}
+                </div>
+
+                {isLoggedIn ? (
+                    <UploadZone
+                        onUpload={handleUpload}
+                        uploading={uploading}
+                        message={message}
+                        reportDate={reportDate}
+                        setReportDate={setReportDate}
+                    />
+                ) : (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6 text-center text-gray-400">
+                        <p className="text-sm">🔒 Log in to upload new reports.</p>
+                    </div>
+                )}
+
+                <DateRangePicker
+                    startDate={startDate}
+                    setStartDate={setStartDate}
+                    endDate={endDate}
+                    setEndDate={setEndDate}
+                    onFetch={fetchData}
+                />
+
+                {/* <MonthCalendar onDateSelect={handleDateSelect} selectedDate={startDate} /> */}
+
+                {rows.length > 0 && (
+                    <ActionButtons
+                        onExport={handleExport}
+                        onDelete={handleDelete}
+                        count={rows.length}
+                         exporting={exporting}
+                    />
+                )}
+
+                <DataTable
+                    rows={rows}
+                    headers={headers}
+                    dateCol={dateCol}
+                    loading={loading}
+                />
+
+                <LoginModal
+                    isOpen={showLogin}
+                    onClose={() => setShowLogin(false)}
+                    onLogin={handleLogin}
+                    error={loginError}
+                />
+            </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+    );
 }
