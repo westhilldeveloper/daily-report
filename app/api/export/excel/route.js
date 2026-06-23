@@ -44,13 +44,13 @@ export async function GET(req) {
             return NextResponse.json({ error: 'Date range required' }, { status: 400 });
         }
 
-        const result = await query(
-            `SELECT date, data, uploaded_at
-             FROM reports
-             WHERE uploaded_at::date >= $1::date AND uploaded_at::date <= $2::date
-             ORDER BY uploaded_at`,
-            [start, end]
-        );
+       const result = await query(
+    `SELECT date, data, uploaded_at
+     FROM reports
+     WHERE report_date >= $1::date AND report_date <= $2::date
+     ORDER BY report_date`,
+    [start, end]
+);
         const rows = result.rows;
         if (!rows.length) {
             return NextResponse.json({ error: 'No data for this range' }, { status: 404 });

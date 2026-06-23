@@ -1,16 +1,14 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/app/lib/db';
 
-// GET /api/calendar?month=YYYY-MM  → returns list of dates that have data
-// GET /api/calendar?months=true   → returns distinct months with data
 export async function GET(req) {
     try {
         const { searchParams } = new URL(req.url);
         const month = searchParams.get('month');
         const months = searchParams.get('months');
 
-        // ─── Return distinct months ──────────────────────────────
         if (months === 'true') {
+            // ✅ Return distinct months (already correct)
             const result = await query(`
                 SELECT DISTINCT TO_CHAR(report_date, 'YYYY-MM') AS month
                 FROM reports
@@ -20,15 +18,15 @@ export async function GET(req) {
             return NextResponse.json({ months: result.rows.map(r => r.month) });
         }
 
-        // ─── Return dates with data for a given month ─────────────
         if (month) {
+            // ✅ Format dates as YYYY-MM-DD (without time)
             const result = await query(`
-                SELECT DISTINCT report_date
+                SELECT DISTINCT TO_CHAR(report_date, 'YYYY-MM-DD') AS date
                 FROM reports
                 WHERE TO_CHAR(report_date, 'YYYY-MM') = $1
-                ORDER BY report_date
+                ORDER BY date
             `, [month]);
-            const dates = result.rows.map(r => r.report_date);
+            const dates = result.rows.map(r => r.date);
             return NextResponse.json({ dates });
         }
 

@@ -6,9 +6,10 @@ export async function POST(req) {
     try {
         const formData = await req.formData();
         const file = formData.get('file');
-        const reportDate = formData.get('reportDate');
-        if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 });
-        if (!reportDate) return NextResponse.json({ error: 'Please select a report date' }, { status: 400 });
+        const reportDate = formData.get('reportDate'); // ✅ this comes from your UI
+
+        if (!file) return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+        if (!reportDate) return NextResponse.json({ error: 'Report date is required' }, { status: 400 });
 
         const ext = file.name.split('.').pop().toLowerCase();
         if (!['xlsx', 'xls', 'csv'].includes(ext)) {
@@ -18,6 +19,7 @@ export async function POST(req) {
         const buffer = Buffer.from(await file.arrayBuffer());
         const { rows, headers, dateCol } = parseExcelBuffer(buffer);
 
+        // ─── Insert each row with report_date ──────────────────────
         for (const row of rows) {
             await query(
                 `INSERT INTO reports (date, data, report_date) VALUES ($1, $2, $3)`,

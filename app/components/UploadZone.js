@@ -18,11 +18,11 @@ export default function UploadZone({ onUpload, uploading, message, reportDate, s
                         className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-gray-50"
                         required
                     />
-                    {reportDate && (
+                    {/* {reportDate && (
                         <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">
                             {formatDateDisplay(reportDate)}
                         </span>
-                    )}
+                    )} */}
                 </div>
 
                 {/* File upload with loader */}
@@ -60,7 +60,7 @@ export default function UploadZone({ onUpload, uploading, message, reportDate, s
                         </span>
                     </label>
                     <span className="text-sm text-gray-400">
-                        {uploading ? '⏳ Uploading...' : 'or drag & drop'}
+                        {uploading ? '⏳' : 'or drag & drop'}
                     </span>
                 </div>
             </div>
