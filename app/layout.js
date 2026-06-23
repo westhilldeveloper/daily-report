@@ -2,6 +2,10 @@ import './globals.css';
 export const metadata = {
     title: 'Daily Report Manager',
     description: 'Upload, filter, and export daily reports',
+     icons: {
+        icon: '/icon.png',
+        
+    },
 };
 
 export default function RootLayout({ children }) {
