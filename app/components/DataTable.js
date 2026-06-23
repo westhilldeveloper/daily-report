@@ -8,48 +8,47 @@ export default function DataTable({ rows, headers, dateCol, loading }) {
     const [sortOrder, setSortOrder] = useState('asc');
     const [showOnlyPaid, setShowOnlyPaid] = useState(false);
 
-    // ── Column width mapping ────────────────────────────────────────
+    // ── Column width mapping (slightly narrower) ──────────────────
     const getColumnWidthClass = (header) => {
-    const lower = header.toLowerCase();
-    if (lower.includes('chit no.')) return 'min-w-[190px]';
-    if (lower.includes('subscriber name')) return 'min-w-[220px]';
-    if (lower.includes('branch')) return 'min-w-[110px]';
-    if (lower.includes('chit value') || lower.includes('subscription due') || 
-        lower.includes('total due') || lower.includes('amt pd') ||           
-        lower.includes('pending cheque amount') ||
-        lower.includes('current installment amount')) return 'min-w-[120px]';
-    if (lower.includes('status')) return 'min-w-[80px]';
-    if (lower.includes('date') || lower.includes('time')) return 'min-w-[110px]';
-    return 'min-w-[100px]';
-};
-    const excludedColumns = ['Subscriber MobileNo.'];
-    // ── Define column order ────────────────────────────────────────
-    // ── Define column order ────────────────────────────────────────
-const desiredOrder = [
-    'Branch',
-    'Chit No.',
-    'Chit Value',
-    'Subscriber Name',
-    'Auction Date',
-    'Next Auction Date',
-    'Next Auction Time',
-    'Due Date',
-    'Due Months',
-    'Subscription Due',
-    'Discount',
-    'Total Due',
-    'Amt Pd',                         
-    'Pending Cheque Amount',
-    'Current Installment No.',
-    'Current Installment Amount',
-    'Status',
-    'Enroll Date',
-    'Incharge Name',
-    'Agent Name',
-    'Subscriber Area'
-];
+        const lower = header.toLowerCase();
+        if (lower.includes('chit no.')) return 'min-w-[160px]';
+        if (lower.includes('subscriber name')) return 'min-w-[180px]';
+        if (lower.includes('branch')) return 'min-w-[90px]';
+        if (lower.includes('chit value') || lower.includes('subscription due') || 
+            lower.includes('total due') || lower.includes('amt pd') ||           
+            lower.includes('pending cheque amount') ||
+            lower.includes('current installment amount')) return 'min-w-[100px]';
+        if (lower.includes('status')) return 'min-w-[70px]';
+        if (lower.includes('date') || lower.includes('time')) return 'min-w-[95px]';
+        return 'min-w-[80px]';
+    };
 
-    // ── Date formatter ─────────────────────────────────────────────
+    const excludedColumns = ['Subscriber MobileNo.'];
+
+    const desiredOrder = [
+        'Branch',
+        'Chit No.',
+        'Chit Value',
+        'Subscriber Name',
+        'Auction Date',
+        'Next Auction Date',
+        'Next Auction Time',
+        'Due Date',
+        'Due Months',
+        'Subscription Due',
+        'Discount',
+        'Total Due',
+        'Amt Pd',                         
+        'Pending Cheque Amount',
+        'Current Installment No.',
+        'Current Installment Amount',
+        'Status',
+        'Enroll Date',
+        'Incharge Name',
+        'Agent Name',
+        'Subscriber Area'
+    ];
+
     const formatDate = (value) => {
         if (!value) return '';
         if (typeof value === 'number') {
@@ -92,23 +91,22 @@ const desiredOrder = [
             const matchedKey = Object.keys(headerMap).find(key => key === lowerDesired);
             if (matchedKey) {
                 const original = headerMap[matchedKey];
-               if (!excludedColumns.includes(original)) {
-                ordered.push(original);
-                used.add(original);
-            }
+                if (!excludedColumns.includes(original)) {
+                    ordered.push(original);
+                    used.add(original);
+                }
             }
         });
 
         headers.forEach(h => {
-        if (!used.has(h) && !excludedColumns.includes(h)) {
-            ordered.push(h);
-        }
-    });
+            if (!used.has(h) && !excludedColumns.includes(h)) {
+                ordered.push(h);
+            }
+        });
 
         return ordered;
     }, [headers]);
 
-    // ── Find special columns ──────────────────────────────────────
     const dueMonthsCol = useMemo(() => {
         return headers.find(h => h.toLowerCase().includes('due months')) || null;
     }, [headers]);
@@ -119,7 +117,6 @@ const desiredOrder = [
 
     const effectiveDateCol = dateCol || headers.find(h => /date/i.test(h)) || null;
 
-    // ── Filter & sort ─────────────────────────────────────────────
     const processedRows = useMemo(() => {
         let result = [...rows];
 
@@ -141,11 +138,10 @@ const desiredOrder = [
         return result;
     }, [rows, searchTerm, sortOrder, subscriberNameCol, dueMonthsCol]);
 
-    // ── Render ──────────────────────────────────────────────────────
     if (!rows.length && !loading) {
         return (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-10 text-center text-gray-400">
-                <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center text-gray-400">
+                <svg className="w-10 h-10 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <p className="text-sm">Select a date range and click "Show Data" to view reports.</p>
@@ -155,22 +151,22 @@ const desiredOrder = [
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-3 px-5 py-4 bg-gray-50/70 border-b border-gray-100">
+            {/* Toolbar – more compact */}
+            <div className="flex flex-wrap items-center gap-2 px-4 py-3 bg-gray-50/70 border-b border-gray-100">
                 {subscriberNameCol && (
                     <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-gray-600">Search by Name:</label>
+                        <label className="text-xs font-medium text-gray-600">Search:</label>
                         <input
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Type a name..."
-                            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white"
+                            className="border border-gray-200 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-white"
                         />
                         {searchTerm && (
                             <button
                                 onClick={() => setSearchTerm('')}
-                                className="text-sm text-gray-400 hover:text-gray-600"
+                                className="text-xs text-gray-400 hover:text-gray-600"
                             >
                                 ✕
                             </button>
@@ -179,18 +175,18 @@ const desiredOrder = [
                 )}
                 {dueMonthsCol && (
                     <div className="flex items-center gap-2 ml-auto">
-                        <span className="text-sm font-medium text-gray-600">Sort by Due Months:</span>
+                        <span className="text-xs font-medium text-gray-600">Sort Due Months:</span>
                         <button
                             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                            className="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-1 transition-colors"
+                            className="px-2.5 py-1 text-xs bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-1 transition-colors"
                         >
-                            {sortOrder === 'asc' ? '↑ Ascending' : '↓ Descending'}
+                            {sortOrder === 'asc' ? '↑ Asc' : '↓ Desc'}
                         </button>
                     </div>
                 )}
             </div>
 
-            {/* Table */}
+            {/* Table – smaller padding and font */}
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-100">
                     <thead className="bg-gray-50/80">
@@ -198,7 +194,7 @@ const desiredOrder = [
                             {orderedHeaders.map(h => (
                                 <th
                                     key={h}
-                                    className={`px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider ${getColumnWidthClass(h)}`}
+                                    className={`px-3 py-2 text-left text-[11px] font-semibold text-gray-600 uppercase tracking-wider ${getColumnWidthClass(h)}`}
                                 >
                                     {h === effectiveDateCol ? '📅 ' + h : h}
                                 </th>
@@ -207,18 +203,23 @@ const desiredOrder = [
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-100">
                         {loading ? (
-                            <tr><td colSpan={orderedHeaders.length} className="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+                            <tr><td colSpan={orderedHeaders.length} className="px-3 py-6 text-center text-gray-400 text-sm">Loading...</td></tr>
                         ) : processedRows.length === 0 ? (
-                            <tr><td colSpan={orderedHeaders.length} className="px-4 py-8 text-center text-gray-400">
+                            <tr><td colSpan={orderedHeaders.length} className="px-3 py-6 text-center text-gray-400 text-sm">
                                 {searchTerm ? 'No matching subscriber names found.' : 'No data for this range.'}
                             </td></tr>
                         ) : (
                             processedRows.map((row, idx) => (
-                                <tr key={idx} className="hover:bg-blue-50/30 transition-colors duration-150">
+                                <tr
+                                    key={idx}
+                                    className={`hover:bg-blue-50/30 transition-colors duration-150 ${
+                                        idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'
+                                    }`}
+                                >
                                     {orderedHeaders.map(h => (
                                         <td
                                             key={h}
-                                            className={`px-4 py-2.5 text-sm text-gray-700 ${getColumnWidthClass(h)}`}
+                                            className={`px-3 py-2 text-xs text-gray-700 ${getColumnWidthClass(h)}`}
                                         >
                                             {dateColumns.includes(h)
                                                 ? formatDate(row.data[h])
@@ -235,8 +236,8 @@ const desiredOrder = [
                 </table>
             </div>
 
-            {/* Footer with row count */}
-            <div className="px-5 py-3 text-sm text-gray-400 border-t border-gray-100 bg-gray-50/50">
+            {/* Footer – compact */}
+            <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-100 bg-gray-50/50">
                 Showing {processedRows.length} of {rows.length} rows
             </div>
         </div>

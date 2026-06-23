@@ -16,11 +16,11 @@ export default function DateRangePicker({ startDate, setStartDate, endDate, setE
                         onChange={(e) => setStartDate(e.target.value)}
                         className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-gray-50"
                     />
-                    {startDate && (
+                    {/* {startDate && (
                         <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">
                             {formatDateDisplay(startDate)}
                         </span>
-                    )}
+                    )} */}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -33,11 +33,11 @@ export default function DateRangePicker({ startDate, setStartDate, endDate, setE
                         onChange={(e) => setEndDate(e.target.value)}
                         className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent bg-gray-50"
                     />
-                    {endDate && (
+                    {/* {endDate && (
                         <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">
                             {formatDateDisplay(endDate)}
                         </span>
-                    )}
+                    )} */}
                 </div>
 
                 <button

@@ -226,7 +226,18 @@ export default function Home() {
                     onFetch={fetchData}
                 />
 
-               <div className="flex items-center gap-3 mb-4">
+              
+
+                {rows.length > 0 && (
+                    <ActionButtons
+                        onExport={handleExport}
+                        onDelete={handleDelete}
+                        count={rows.length}
+                         exporting={exporting}
+                    />
+                )}
+
+ <div className="flex items-center gap-3 mb-4">
     <button
         onClick={() => setShowCalendar(!showCalendar)}
         className="text-sm text-gray-600 hover:text-blue-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:border-blue-300 transition-colors"
@@ -243,16 +254,6 @@ export default function Home() {
         </div>
     )}
 </div>
-
-                {rows.length > 0 && (
-                    <ActionButtons
-                        onExport={handleExport}
-                        onDelete={handleDelete}
-                        count={rows.length}
-                         exporting={exporting}
-                    />
-                )}
-
                 <DataTable
                     rows={rows}
                     headers={headers}
