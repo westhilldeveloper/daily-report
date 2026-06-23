@@ -7,8 +7,8 @@ export async function GET(req) {
         const month = searchParams.get('month');
         const months = searchParams.get('months');
 
+        // ─── Return distinct months (YYYY-MM) ──────────────────────
         if (months === 'true') {
-            // ✅ Return distinct months (already correct)
             const result = await query(`
                 SELECT DISTINCT TO_CHAR(report_date, 'YYYY-MM') AS month
                 FROM reports
@@ -18,12 +18,13 @@ export async function GET(req) {
             return NextResponse.json({ months: result.rows.map(r => r.month) });
         }
 
+        // ─── Return dates with data for a specific month ───────────
         if (month) {
-            // ✅ Format dates as YYYY-MM-DD (without time)
             const result = await query(`
                 SELECT DISTINCT TO_CHAR(report_date, 'YYYY-MM-DD') AS date
                 FROM reports
-                WHERE TO_CHAR(report_date, 'YYYY-MM') = $1
+                WHERE report_date IS NOT NULL
+                  AND TO_CHAR(report_date, 'YYYY-MM') = $1
                 ORDER BY date
             `, [month]);
             const dates = result.rows.map(r => r.date);
@@ -32,7 +33,7 @@ export async function GET(req) {
 
         return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     } catch (err) {
-        console.error(err);
+        console.error('Calendar error:', err);
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }
