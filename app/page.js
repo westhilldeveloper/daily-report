@@ -7,7 +7,7 @@ import ActionButtons from '@/app/components/ActionButtons';
 import DataTable from '@/app/components/DataTable';
 import LoginModal from '@/app/components/LoginModal';
 import MonthCalendar from '@/app/components/MonthCalendar';
-
+import { Calendar as CalendarIcon } from 'lucide-react';
 export default function Home() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
@@ -238,12 +238,15 @@ export default function Home() {
                 )}
 
  <div className="flex items-center gap-3 mb-4">
+    {!showCalendar && (
     <button
-        onClick={() => setShowCalendar(!showCalendar)}
-        className="text-sm text-gray-600 hover:text-blue-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:border-blue-300 transition-colors"
+        onClick={() => setShowCalendar(true)}
+        className="inline-flex items-center justify-center p-2 text-gray-600 hover:text-blue-600 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
+        title="Open calendar"
     >
-        {showCalendar ? '📅 Hide Calendar' : '📅 Show Calendar'}
+        <CalendarIcon className="w-4 h-4" />
     </button>
+)}
     {showCalendar && (
         <div className="relative">
             <MonthCalendar
