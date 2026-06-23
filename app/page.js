@@ -23,6 +23,7 @@ export default function Home() {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState(null);
+    const [showCalendar, setShowCalendar] = useState(false);
 
     // ── Check login status on mount ──────────────────────────────
     useEffect(() => {
@@ -39,6 +40,7 @@ export default function Home() {
     setEndDate(dateStr);
     // fetchData will be triggered by useEffect
 };
+
 
     // ── Login handler ────────────────────────────────────────────
     const handleLogin = async (username, password) => {
@@ -224,7 +226,23 @@ export default function Home() {
                     onFetch={fetchData}
                 />
 
-                {/* <MonthCalendar onDateSelect={handleDateSelect} selectedDate={startDate} /> */}
+               <div className="flex items-center gap-3 mb-4">
+    <button
+        onClick={() => setShowCalendar(!showCalendar)}
+        className="text-sm text-gray-600 hover:text-blue-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:border-blue-300 transition-colors"
+    >
+        {showCalendar ? '📅 Hide Calendar' : '📅 Show Calendar'}
+    </button>
+    {showCalendar && (
+        <div className="relative">
+            <MonthCalendar
+                onDateSelect={handleDateSelect}
+                selectedDate={startDate}
+                onClose={() => setShowCalendar(false)}
+            />
+        </div>
+    )}
+</div>
 
                 {rows.length > 0 && (
                     <ActionButtons
