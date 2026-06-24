@@ -251,25 +251,32 @@ export default function Home() {
 
                
 
- <div className="flex items-center gap-3 mb-4">
+ <div className="flex items-center gap-3 mb-4 relative">
+    {/* Calendar toggle button */}
     {!showCalendar && (
-    <button
-        onClick={() => setShowCalendar(true)}
-        className="inline-flex items-center justify-center p-2 text-gray-600 hover:text-blue-600 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
-        title="Open calendar"
-    >
-        <CalendarIcon className="w-4 h-4" />
-    </button>
-)}
-    {showCalendar && (
-        <div className="relative">
-            <MonthCalendar
-                onDateSelect={handleDateSelect}
-                selectedDate={startDate}
-                onClose={() => setShowCalendar(false)}
-            />
-        </div>
+        <button
+            onClick={() => setShowCalendar(true)}
+            className="inline-flex items-center justify-center transition-colors"
+            title="Open calendar"
+        >
+            <img src="/calendar.gif" alt="calendar" className="h-10 w-auto" />
+        </button>
     )}
+
+    {/* Calendar popover with slide animation */}
+    <div
+        className={`absolute top-full left-0 mt-2 z-50 transition-all duration-300 ease-in-out origin-top ${
+            showCalendar
+                ? 'opacity-100 scale-y-100 translate-y-0 pointer-events-auto'
+                : 'opacity-0 scale-y-0 -translate-y-2 pointer-events-none'
+        }`}
+    >
+        <MonthCalendar
+            onDateSelect={handleDateSelect}
+            selectedDate={startDate}
+            onClose={() => setShowCalendar(false)}
+        />
+    </div>
 </div>
                 <DataTable
                     rows={rows}
