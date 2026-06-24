@@ -185,7 +185,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
                    <h1 className="text-3xl font-light text-gray-800 tracking-tight flex items-center gap-2">
-    <img src="/document-folder.gif" alt="Line bars" className="h-8 w-auto" />
+    <img src="/fn_logo.png" alt="Line bars" className="h-8 w-auto" />
     Daily Report Manager
 </h1>
                     {isLoggedIn ? (
@@ -204,11 +204,11 @@ export default function Home() {
 ) : (
     <button
         onClick={() => setShowLogin(true)}
-        className="flex items-center justify-center border border-gray-200 hover:border-green-300  transition-colors "
+        className="flex items-center justify-center rounded-full border border-gray-200 hover:border-green-300  transition-colors "
         title="Login"
     >
         <img
-            src="/login.gif"
+            src="/login.png"
             alt="Login"
             className="h-10 w-auto rounded-sm"
         />

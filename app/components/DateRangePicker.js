@@ -45,7 +45,7 @@ export default function DateRangePicker({ startDate, setStartDate, endDate, setE
     className="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center gap-2"
 >
     <img
-        src="/search.gif"
+        src="/search.png"
         alt="Search"
         className="h-5 w-auto rounded-full"
     />
