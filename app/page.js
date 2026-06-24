@@ -213,11 +213,19 @@ export default function Home() {
                         setReportDate={setReportDate}
                     />
                 ) : (
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6 text-center text-gray-400">
-                        <p className="text-sm">🔒 Log in to upload new reports.</p>
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-0 mb-0 text-center text-gray-400">
+                        
                     </div>
                 )}
-
+ {rows.length > 0 && (
+                    <ActionButtons
+                        onExport={handleExport}
+                        onDelete={handleDelete}
+                        count={rows.length}
+                         exporting={exporting}
+                         isLoggedIn={isLoggedIn}
+                    />
+                )}
                 <DateRangePicker
                     startDate={startDate}
                     setStartDate={setStartDate}
@@ -228,15 +236,7 @@ export default function Home() {
 
               
 
-                {rows.length > 0 && (
-                    <ActionButtons
-                        onExport={handleExport}
-                        onDelete={handleDelete}
-                        count={rows.length}
-                         exporting={exporting}
-                         isLoggedIn={isLoggedIn}
-                    />
-                )}
+               
 
  <div className="flex items-center gap-3 mb-4">
     {!showCalendar && (
