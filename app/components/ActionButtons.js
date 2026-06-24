@@ -8,7 +8,14 @@ import {
     Database
 } from 'lucide-react';
 
-export default function ActionButtons({ onExport, onDelete, count, exportingExcel, exportingPDF }) {
+export default function ActionButtons({
+    onExport,
+    onDelete,
+    count,
+    exportingExcel,
+    exportingPDF,
+    isLoggedIn,          // ← new prop
+}) {
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 hover:shadow-md transition-shadow duration-200">
             <div className="flex flex-wrap items-center gap-3">
@@ -48,15 +55,17 @@ export default function ActionButtons({ onExport, onDelete, count, exportingExce
                         {exportingPDF ? 'Exporting...' : 'Export PDF'}
                     </button>
 
-                    {/* Delete Range */}
-                    <button
-                        onClick={onDelete}
-                        disabled={!count || exportingExcel || exportingPDF}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                        Delete Range
-                    </button>
+                    {/* Delete Range – visible only when logged in */}
+                    {isLoggedIn && (
+                        <button
+                            onClick={onDelete}
+                            disabled={!count || exportingExcel || exportingPDF}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Delete Range
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

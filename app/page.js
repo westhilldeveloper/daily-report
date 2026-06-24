@@ -234,6 +234,7 @@ export default function Home() {
                         onDelete={handleDelete}
                         count={rows.length}
                          exporting={exporting}
+                         isLoggedIn={isLoggedIn}
                     />
                 )}
 
