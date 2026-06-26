@@ -3,19 +3,38 @@
 import { useState, useMemo } from 'react';
 import { formatNumber } from '@/app/lib/dateFormatter';
 
+// ─── Helper: find the "Amt Pd" or "Amt Paid" column ──────────────
+function findAmtColumn(keys) {
+    const lowerKeys = keys.map(k => k.trim().toLowerCase());
+    const exactMatches = ['amt pd', 'amt pd.', 'amt paid', 'amt paid.', 'amtpd', 'amount paid', 'paid amount'];
+    for (const match of exactMatches) {
+        const idx = lowerKeys.indexOf(match);
+        if (idx !== -1) return keys[idx];
+    }
+    // Fallback: contains both "amt" and "pd" or "paid"
+    for (const key of keys) {
+        const lower = key.toLowerCase();
+        if ((lower.includes('amt') && (lower.includes('pd') || lower.includes('paid'))) ||
+            lower.includes('amount paid') || lower.includes('paid amount')) {
+            return key;
+        }
+    }
+    return null;
+}
+
 export default function DataTable({ rows, headers, dateCol, loading }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
     const [showOnlyPaid, setShowOnlyPaid] = useState(false);
 
-    // ── Column width mapping (slightly narrower) ──────────────────
+    // ── Column width mapping ──────────────────────────────────────
     const getColumnWidthClass = (header) => {
         const lower = header.toLowerCase();
         if (lower.includes('chit no.')) return 'min-w-[160px]';
         if (lower.includes('subscriber name')) return 'min-w-[180px]';
         if (lower.includes('branch')) return 'min-w-[90px]';
         if (lower.includes('chit value') || lower.includes('subscription due') || 
-            lower.includes('total due') || lower.includes('amt pd') ||           
+            lower.includes('total due') || lower.includes('amt pd') || lower.includes('amt paid') ||         
             lower.includes('pending cheque amount') ||
             lower.includes('current installment amount')) return 'min-w-[100px]';
         if (lower.includes('status')) return 'min-w-[70px]';
@@ -25,6 +44,10 @@ export default function DataTable({ rows, headers, dateCol, loading }) {
 
     const excludedColumns = ['Subscriber MobileNo.'];
 
+    // ─── Detect the actual "Amt" column ──────────────────────────
+    const amtColumn = findAmtColumn(headers);
+
+    // ─── Define desired order (with placeholder for Amt) ──────────
     const desiredOrder = [
         'Branch',
         'Chit No.',
@@ -38,7 +61,7 @@ export default function DataTable({ rows, headers, dateCol, loading }) {
         'Subscription Due',
         'Discount',
         'Total Due',
-        'Amt Pd',                         
+        'Amt Placeholder',     // will be replaced with actual column name
         'Pending Cheque Amount',
         'Current Installment No.',
         'Current Installment Amount',
@@ -87,7 +110,12 @@ export default function DataTable({ rows, headers, dateCol, loading }) {
         const used = new Set();
 
         desiredOrder.forEach(desired => {
-            const lowerDesired = desired.toLowerCase().trim();
+            // Replace placeholder with actual column if found
+            let target = desired;
+            if (desired === 'Amt Placeholder') {
+                target = amtColumn || 'Amt Pd'; // fallback if not found
+            }
+            const lowerDesired = target.toLowerCase().trim();
             const matchedKey = Object.keys(headerMap).find(key => key === lowerDesired);
             if (matchedKey) {
                 const original = headerMap[matchedKey];
@@ -105,7 +133,7 @@ export default function DataTable({ rows, headers, dateCol, loading }) {
         });
 
         return ordered;
-    }, [headers]);
+    }, [headers, amtColumn]);
 
     const dueMonthsCol = useMemo(() => {
         return headers.find(h => h.toLowerCase().includes('due months')) || null;
@@ -151,7 +179,6 @@ export default function DataTable({ rows, headers, dateCol, loading }) {
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            {/* Toolbar – more compact */}
             <div className="flex flex-wrap items-center gap-2 px-4 py-3 bg-gray-50/70 border-b border-gray-100">
                 {subscriberNameCol && (
                     <div className="flex items-center gap-2">
@@ -186,7 +213,6 @@ export default function DataTable({ rows, headers, dateCol, loading }) {
                 )}
             </div>
 
-            {/* Table – smaller padding and font */}
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-100">
                     <thead className="bg-gray-50/80">
@@ -236,7 +262,6 @@ export default function DataTable({ rows, headers, dateCol, loading }) {
                 </table>
             </div>
 
-            {/* Footer – compact */}
             <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-100 bg-gray-50/50">
                 Showing {processedRows.length} of {rows.length} rows
             </div>
